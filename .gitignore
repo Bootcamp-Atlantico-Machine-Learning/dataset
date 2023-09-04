@@ -10,3 +10,6 @@
 # Ignora arquivos gerados
 .pytest_cache
 .venv
+/venv
+.env
+.env.*
