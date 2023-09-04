@@ -13,3 +13,8 @@
 /venv
 .env
 .env.*
+
+# ignora tudo que está dentro da pasta
+# /venv/
+/Dataset_BUSI_with_GT/
+
