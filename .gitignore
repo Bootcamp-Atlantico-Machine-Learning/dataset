@@ -15,5 +15,5 @@
 .env.*
 
 # ignora tudo que está dentro da pasta Dataset_BUSI_with_GT
-Dataset_BUSI_with_GT/*
+/Dataset_BUSI_with_GT/*
 
