@@ -2,7 +2,7 @@ import os
 import sys
 
 def requirements_install():
-    """Instala as dependências de um projeto."""
+    """Instala as dependências de um projeto.k"""
 
     # Verifica se o arquivo requirements.txt existe.
     if not os.path.exists("requirements.txt"):
