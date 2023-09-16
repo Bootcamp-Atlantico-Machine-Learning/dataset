@@ -1,4 +1,3 @@
-import 'react' 
 
 export default function TelaPrincipal(){
     return(
