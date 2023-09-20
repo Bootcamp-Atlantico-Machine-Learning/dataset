@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 import cv2
+import os
+import time
 
 def plot_image(img, title=None, height=5, width=5):
     plt.figure(figsize=(height, width))
@@ -29,150 +31,90 @@ def plot_histogram(img, title=None, height=5, width=5):
         plt.hist(img.ravel(), 256, [0, 256])
     plt.show()
 
-# pegue uma imagem na pasta src\data\Dataset_BUSI_with_GT\benign e mostre-a
 
-img = cv2.imread('src/data/Dataset_BUSI_with_GT/benign/benign (1).png')
+def monta_dataframe(CAMINHO):
+    '''
+    Retorna um DataFrame com as informações do dataset
+    Parâmetro:
+    pasta (str) : Informe o caminho até a pasta 'Dataset_BUSI_with_GT'
+    '''
+    tempo_inicio = time.time()
+    print("Montando o dataframe...")
 
-# Lendo em RGB
-rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    masks = sorted(glob(f"{CAMINHO}/*/*_mask.png"))
+    images = sorted(glob(f"{CAMINHO}/*/*).png"))
 
-# Lendo em HSV
-hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    df = pd.DataFrame(columns=['images', 'masks', 'labels', 'height', 'width'])
 
-# Lendo em YCrCb
-ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+    for i in range(len(images)):    
 
-# Lendo em L*U*V
-luv = cv2.cvtColor(img, cv2.COLOR_BGR2Luv)
+        # lê a imagem
+        img = cv2.imread(images[i])
+        # pega a altura e largura da imagem
+        height, width = img.shape[:2]
+        # pega o label
+        label = images[i].split('\\')[2].split(' ')[0]
+        # adiciona as informações no dataframe
+        df.loc[i] = [images[i], masks[i], label, height, width]
 
-plot_image([rgb, hsv, ycrcb, luv], ['RGB', 'HSV', 'YCrCb', 'Luv'])
+    tempo_fim = time.time()
 
-# gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    print(df.head())
 
-# # normalized_image = gray_image / 255.0
+    print("Dataframe montado com sucesso! Tempo de execução: {:.2F}s\n".format(tempo_fim - tempo_inicio))
 
-# blurred_image = cv2.blur(gray_image, (4, 4))
+    return df
 
-# enhaced_image = cv2.convertScaleAbs(blurred_image, alpha=1.5, beta=0)
-
-# mean_value = int(np.mean(blurred_image))
-
-# print(mean_value)
-
-# # use otsu para binarizar a imagem usando o valor minimo 
-
-# otsu_threshold, otsu_image = cv2.threshold(blurred_image, mean_value, 255, cv2.THRESH_BINARY)
-
-# rgb_image = cv2.cvtColor(otsu_image, cv2.COLOR_GRAY2RGB)
-
-
-# plot_image([gray_image, otsu_image])
-
-
-# # print("max tom de cinza", normalized_image.max())
-# # print("mean tom de cinza", normalized_image.mean())
-# # print("min tom de cinza", normalized_image.min())
-
-# # plt.subplot(1, 2, 1)
-# # plt.imshow(gray_image, cmap='gray')
-# # plt.title("Imagem cinza")
-
-# # plt.subplot(1, 2, 2)
-# # plt.imshow(normalized_image, cmap='gray')
-# # plt.title("Imagem normalizada")
-
-# # plt.show()
-
-# # def rgd_to_gray(image):
-# #     R = 0.2989
-# #     G = 0.5870
-# #     B = 0.1140
-# #     return np.dot(image[..., :3], [R, G, B])
-
-# # gray_image = rgd_to_gray(img)
-
-# # plt.subplot(1, 2, 1)
-# # plt.imshow(img)
-# # plt.title("Imagem RGB")
-
-# # plt.subplot(1, 2, 2)
-# # plt.imshow(gray_image, cmap='gray')
-# # plt.title("Imagem cinza")
-
-# # plt.show()
-
-# blurred_image = cv2.blur(gray_image, (4, 4))
-
-# # plt.subplot(1, 2, 1)
-# # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-# # plt.title("Imagem gray")
-
-# # plt.subplot(1, 2, 2)
-# # plt.imshow(cv2.cvtColor(blurred_image, cv2.COLOR_BGR2RGB))
-# # plt.title("Imagem suavizada")
-
-# # plt.show()
+    
 
 
 
 
+def resize_images(df, height=None, width=None):
 
+    if height == None:
+        raise Exception('height precisa ser informado')
+    if width == None:
+        raise Exception('width precisa ser informado')
 
-# # b, g, r = cv2.split(image)
+    print("resize images")
 
-# # plt.figure(figsize=(10, 5))
-# # plt.subplot(131)
-# # plt.imshow(r, cmap='gray')
-# # plt.title("Canal R")
+    # lista com as imagens redimensionadas
+    images_resized = []
+    labels = []
 
-# # plt.subplot(132)
-# # plt.imshow(g, cmap='gray')
-# # plt.title("Canal G")
+    # percorre o dataframe
+    for i in range(len(df)):
+        # pega a imagem
+        img = cv2.imread(df['images'][i])
+        # redimensiona a imagem
+        img = cv2.resize(img, (height, width))
+        # adiciona a imagem redimensionada na lista
+        images_resized.append(img)
+        # adiciona o label na lista
+        labels.append(df['labels'][i])
 
-# # plt.subplot(133)
-# # plt.imshow(b, cmap='gray')
-# # plt.title("Canal B")
+    # cria uma coluna no dataframe com as imagens redimensionadas
+    df['images_resized'] = images_resized
+    # cria uma coluna no dataframe com os labels
+    df['labels'] = labels
 
-# # plt.tight_layout()
-plt.show()
+    del images_resized
+    del labels
 
-# Filtro Blur: 
-# O blur é o filtro de média.
-# Para aplicar esse filtro em uma imagem basta definir o tamanho do kernel e passar como parâmetro para a função cv2.blur.
-filter_blur = cv2.blur(img, ksize=(3,3))
+    print("images resized")
+    print(df.head())
 
-# --------------------------------------
+    return df
 
-# Filtro GaussianBlur: usa um kernel em forma de Gaussiana. Isso é como um cone no centro do kernel, os valores vão decaindo a medida que afasta.
-# O kernel precisa ter dimensões ímpares para manter a simetria da Gaussiana.
-# O parâmetro sigmaX permite definir o desvio padrão na direção x, (existem sigmaY, se não especificado sigmaY=sigmaX), quando o valor é 0 o sigmaX vai ser calculado em função do tamanho do kernel.
-gaugaussian = cv2.GaussianBlur(src=img,ksize=(13,13),sigmaX=0)
+def save_images(df):
 
-# --------------------------------------
+    print("save images")
+    i = 1
+    # salva as imagens como png
+    # for i in range(len(df)):
+    image = cv2.cvtColor(df['images_resized'][i], cv2.COLOR_BGR2RGB)
+    plot_image(image)
+    cv2.imwrite('/src/data/Dataset_BUSI_with_GT_resized/' + df['labels'][i] + '/' + df['images'][i].split('\\')[2], image)
 
-# Filtro medianBlur
-# A principal característica do filtro medianBlur é que o pixel da nova imagem é sempre um valor de pixel da imagem anterior. 
-# Isso não causa o efeito de suavização de borda como o filtro blur e GaussianBlur.
-# O tamanho do kernel para medianBlur deve ser um valor ímpar
-# O medianBlur é o filtro mais eficaz para remoção de ruído, porém pode custar computacionalmente 8 vezes em relação do blur. 
-median=cv2.medianBlur(img, 13)
-
-# --------------------------------------
-
-# Filtro Bilateral
-# O filtro bilateral também utiliza uma Gaussiana, porem tem uma pequena diferença. 
-# No filtro gaussianoBlur é espacial, os seja ele calcula uma média ponderada dos pixels vizinhos. 
-# A Gaussiana do filtro bilateral é uma função da intensidade, somente os pixels com intensidade parecida é considerado para o desfoque.
-# d=13 é o tamanho do kernel. sigmaColor e sigmaspace é o desvio padrão para os kernel no espaço de cor e no espaço 2D da imagem.
-bilateral = cv2.bilateralFilter(img, d=13, sigmaColor=75, sigmaSpace=75)
-
-
-# Filtro de média adaptativo
-# O filtro de média adaptativo é um filtro não linear que preserva as bordas.
-# O filtro de média adaptativo calcula a média dos pixels vizinhos, mas o tamanho do kernel é variável, ou seja, o tamanho do kernel depende do desvio padrão.
-# O filtro de média adaptativo é mais eficaz para remover ruídos de imagens com variação de iluminação.
-# O filtro de média adaptativo é mais lento que os outros filtros.
-adaptive = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
-
-plot_image([img, filter_blur, gaugaussian, median, bilateral], ['Original', 'Blur', 'Gaussian', 'Median', 'Bilateral'])
-
+    print("images saved")
