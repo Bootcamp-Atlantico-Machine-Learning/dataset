@@ -38,83 +38,118 @@ def monta_dataframe(CAMINHO):
     Parâmetro:
     pasta (str) : Informe o caminho até a pasta 'Dataset_BUSI_with_GT'
     '''
-    tempo_inicio = time.time()
+    tempo_inicio = time.time() # pega o tempo de início
+
     print("Montando o dataframe...")
 
-    masks = sorted(glob(f"{CAMINHO}/*/*_mask.png"))
-    images = sorted(glob(f"{CAMINHO}/*/*).png"))
+    try:
+        mascaras = sorted(glob(f"{CAMINHO}/*/*_mask.png"))
+    except:
+        raise Exception('Erro ao ler as mascaras, verifique o caminho informado')
 
-    df = pd.DataFrame(columns=['images', 'masks', 'labels', 'height', 'width'])
+    try:
+        images = sorted(glob(f"{CAMINHO}/*/*).png"))
+    except:
+        raise Exception('Erro ao ler as imagens, verifique o caminho informado')
+    
+    df = pd.DataFrame(columns=['images', 'mascaras', 'classe', 'altura', 'largura'])
 
-    for i in range(len(images)):    
+    try:
+        for i in range(len(images)):    
 
-        # lê a imagem
-        img = cv2.imread(images[i])
-        # pega a altura e largura da imagem
-        height, width = img.shape[:2]
-        # pega o label
-        label = images[i].split('\\')[2].split(' ')[0]
-        # adiciona as informações no dataframe
-        df.loc[i] = [images[i], masks[i], label, height, width]
+            img = cv2.imread(images[i]) # lê a imagem
+
+            altura, largura = img.shape[:2] # pega a altura e largura da imagem
+            
+            label = images[i].split('\\')[2].split(' ')[0] # pega o label
+
+            df.loc[i] = [images[i], mascaras[i], label, altura, largura] # adiciona as informações no dataframe
+    except:
+        raise Exception('Erro ao montar o dataframe')
 
     tempo_fim = time.time()
 
     print(df.head())
 
-    print("Dataframe montado com sucesso! Tempo de execução: {:.2F}s\n".format(tempo_fim - tempo_inicio))
+    print("Dataframe montado com sucesso! Tempo de execução: {:.2F}s\n".format(tempo_fim - tempo_inicio)) # imprime o tempo de execução
 
     return df
 
+
+def redimensiona_imagens(df, altura=None, largura=None):
+    '''
+    Redimensiona as imagens do dataframe
+    Parâmetros:
+    df (DataFrame) : Informe o dataframe
+    altura (int) : Informe a altura
+    largura (int) : Informe a largura
+    '''
+    tempo_inicio = time.time() # pega o tempo de início
+
+    if altura == None:
+        raise Exception('altura precisa ser informado')
     
+    if largura == None:
+        raise Exception('largura precisa ser informado')
 
+    print("Redimensionando as imagens...")
 
-
-
-def resize_images(df, height=None, width=None):
-
-    if height == None:
-        raise Exception('height precisa ser informado')
-    if width == None:
-        raise Exception('width precisa ser informado')
-
-    print("resize images")
-
-    # lista com as imagens redimensionadas
     images_resized = []
-    labels = []
 
-    # percorre o dataframe
-    for i in range(len(df)):
-        # pega a imagem
-        img = cv2.imread(df['images'][i])
-        # redimensiona a imagem
-        img = cv2.resize(img, (height, width))
-        # adiciona a imagem redimensionada na lista
-        images_resized.append(img)
-        # adiciona o label na lista
-        labels.append(df['labels'][i])
+    classe = []
 
-    # cria uma coluna no dataframe com as imagens redimensionadas
-    df['images_resized'] = images_resized
-    # cria uma coluna no dataframe com os labels
-    df['labels'] = labels
+    try:
+        for i in range(len(df)):
+            
+            img = cv2.imread(df['images'][i]) # pega a imagem
+            
+            img = cv2.resize(img, (altura, largura)) # redimensiona a imagem
+            
+            images_resized.append(img) # adiciona a imagem redimensionada na lista
+            
+            classe.append(df['classe'][i]) # adiciona o label na lista
+    except:
+        raise Exception('Erro ao redimensionar as imagens, verifique o dataframe informado')
 
-    del images_resized
-    del labels
+    df2 = pd.DataFrame(columns=['imagem_redimensionada', 'classe'])
 
-    print("images resized")
-    print(df.head())
+    try:
+        for i in range(len(images_resized)):
+            df2.loc[i] = [images_resized[i], classe[i]] # adiciona as informações no dataframe
+    except:
+        raise Exception('Erro ao montar o dataframe das imagens redimensionadas')
+
+    tempo_fim = time.time() # pega o tempo de fim
+
+    print(df2.head())
+
+    print("Imagens redimensionadas com sucesso! Tempo de execução: {:.2F}s\n".format(tempo_fim - tempo_inicio)) # imprime o tempo de execução
+
+    return df2
+
+def salva_imagens(df, caminho=None):
+    '''
+    Salva as imagens do dataframe
+    Parâmetros:
+    df (DataFrame) : Informe o dataframe
+    caminho (str) : Informe o caminho onde deseja salvar as imagens
+    '''
+    tempo_inicio = time.time() # pega o tempo de início
+
+    if caminho == None:
+        raise Exception('caminho precisa ser informado')
+
+    print("Salvando as imagens...")
+
+    try:
+        for i in range(len(df)):
+            cv2.imwrite(f"{caminho}/{df['classe'][i]}_{i}.png", df['imagem_redimensionada'][i]) # salva as imagens
+    except:
+        raise Exception('Erro ao salvar as imagens, verifique o dataframe informado')
+
+    tempo_fim = time.time() # pega o tempo de fim
+
+    print("Imagens salvas com sucesso! Tempo de execução: {:.2F}s\n".format(tempo_fim - tempo_inicio)) # imprime o tempo de execução
 
     return df
 
-def save_images(df):
-
-    print("save images")
-    i = 1
-    # salva as imagens como png
-    # for i in range(len(df)):
-    image = cv2.cvtColor(df['images_resized'][i], cv2.COLOR_BGR2RGB)
-    plot_image(image)
-    cv2.imwrite('/src/data/Dataset_BUSI_with_GT_resized/' + df['labels'][i] + '/' + df['images'][i].split('\\')[2], image)
-
-    print("images saved")
