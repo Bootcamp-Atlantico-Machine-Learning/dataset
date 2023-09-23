@@ -1,21 +1,26 @@
-from flask import Flask, jsonify, request
-import firebase_admin
-from firebase_admin import credentials,storage
-from google.cloud import storage
-from google.oauth2 import service_account
+from flask import Flask, request, jsonify
+import os
 
-config = {
-  "apiKey": "AIzaSyDci14vP0nqfyDyDymcFTG0CgZyAJLhPvg",
-  "authDomain": "cancertumorbootcampdosboots.firebaseapp.com",
-  "projectId": "cancertumorbootcampdosboots",
-  "storageBucket": "cancertumorbootcampdosboots.appspot.com",
-  "messagingSenderId": "1025730251750",
-  "appId": "1:1025730251750:web:bfcd620d8dcfa2ad502427",
-  "measurementId": "G-HTJRM0LT10"
-}
+app = Flask(__name__)
 
+# Configurar o diretório onde você deseja salvar as fotos
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-cred = credentials.Certificate("backend\cancertumorbootcampdosboots-8d42b3f35964.json")
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'Nenhum arquivo enviado'})
 
-firebase = firebase_admin.initialize_app(cred)
-storage.Client(credentials=credentials).bucket(firebase_admin.storage.bucket().name).blob('file.png').download_to_filename('image.png')
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'error': 'Nome de arquivo vazio'})
+
+    if file:
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filename)
+        return jsonify({'message': 'Upload bem-sucedido', 'filename': filename})
+
+if __name__ == '__main__':
+    app.run()
