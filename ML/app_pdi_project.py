@@ -6,16 +6,26 @@ import cv2
 import os
 import time
 
-def plot_image(img, title=None, height=5, width=5):
-    plt.figure(figsize=(height, width))
+def plotar_imagem(img, titulo=None, altura=5, largura=5):
+
+    plt.figure(figsize=(altura, largura))
+
     if type(img) == list:
+
         for i in range(len(img)):
+
             plt.subplot(1, len(img), i+1)
+
             plt.imshow(img[i], cmap='gray')
-            if title:
-                plt.title(title[i])
+
+            if titulo:
+
+                plt.title(titulo[i])
+
     else:
+
         plt.imshow(img, cmap='gray')
+
     plt.show()
 
 def plot_histogram(img, title=None, height=5, width=5):
@@ -53,7 +63,7 @@ def monta_dataframe(CAMINHO):
         raise Exception('Erro ao ler as imagens, verifique o caminho informado')
     
     df = pd.DataFrame(columns=['images', 'mascaras', 'classe', 'altura', 'largura'])
-
+    
     try:
         for i in range(len(images)):    
 

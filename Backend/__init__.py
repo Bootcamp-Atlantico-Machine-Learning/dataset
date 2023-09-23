@@ -1,36 +1,57 @@
+# from ..ML.src.nlp.nlp_functions import readModel
 from flask import Flask, request
 from flask import send_file
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
+import numpy as np
 from glob import glob
+import tensorflow as tf
 import cv2
 
+def readModel(model_path):
+    try:
+        model = tf.keras.models.load_model(model_path)
+        print('Modelo carregado com sucesso!')
+    except:
+      raise Exception('Erro ao carregar o modelo!')    
+    return model
+
+model = readModel('model')
 
 app = Flask(__name__)
 
-@app.route('/upload', methods=['POST'])
-def upload():
-    # Obtém o arquivo de imagem do pedido HTTP
-    img = request.files['image']
+@app.route('/')
+def verify():
+    return 'Hello World!'
 
-    # salva a imagem
-    img.save('image.jpg')
+@app.route('/predictImage', methods=['POST'])
+def predictImage():
 
-    # Lê a imagem salva
-    img = cv2.imread('image.jpg')
+    image = request.files['image']
 
-    # Converte a imagem para escala de cinza
-    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    image.save('image.jpg')
 
-    # Aplica o filtro de média
-    # img = cv2.blur(img, (5, 5))
+    image = cv2.imread('image.jpg')
 
-    # Salva a imagem
-    cv2.imwrite('image.jpg', img)
+    image = cv2.resize(image, (128, 128))
 
-    # # Retorna o arquivo de imagem como uma resposta HTTP
-    return send_file('image.jpg')
+    image = np.expand_dims(image, axis=0)
+
+    image = image/255
+
+    prediction, _ = model.predict(image)
+
+    img = np.reshape(prediction, (128, 128))
+
+    img = img*255
+
+    img = img.astype('uint8')
+
+    # Salve a imagem em um arquivo
+    cv2.imwrite('img.png', img)
+
+    # Envie o arquivo para o cliente
+    return send_file('img.png', mimetype='image/png')
+
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
