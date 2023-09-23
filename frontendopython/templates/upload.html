@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload de Imagem</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='upload.css') }}">
+
+</head>
+<body>
+    <div class="divMain">
+
+        <h1>Upload de Imagem</h1>
+        <img id="uploaded-image" src="{{ uploaded_image }}" alt="Imagem Enviada">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="file"> <br> <br>
+            <input type="submit" value="Enviar">
+        </form>
+    </div>
+
+</body>
+</html>
+
+
+
+
+ 
