@@ -7,9 +7,12 @@ UPLOAD_FOLDER = 'backend/imagens'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
+def Resultado():
+    return None
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    Resultado = 'o'
     if request.method == 'POST':
         if 'file' not in request.files:
             return "Escolha uma imagem raio x"
@@ -26,9 +29,15 @@ def upload_file():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
 
-        return render_template('upload.html', uploaded_image=file_path)
+        if Resultado() != None:
+            Resultado = Resultado()
+        else:
+            Resultado = 'espere'
+            
 
-    return render_template('upload.html')
+        return render_template('upload.html', uploaded_image=file_path,Resultado=Resultado)
+
+    return render_template('upload.html',Resultado=Resultado)
 
 if __name__ == '__main__':
     app.run(debug=True)

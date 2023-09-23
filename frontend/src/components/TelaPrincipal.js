@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import DataBase from './firebase/firebase-config';
-import {  ref ,uploadBytes } from 'firebase/storage';
+
 import axios from 'axios';
 
 
@@ -11,7 +10,7 @@ export default function TelaPrincipal()
 
     const handleUpload = async () => {
         const formData = new FormData();
-        formData.append('file', File);
+        formData.append('file', FileFirebase);
     
         try {
           const response = await axios.post('/upload', formData, {
@@ -26,15 +25,6 @@ export default function TelaPrincipal()
         }
       };
 
-    //Firebase ignore isso
-    function PostImageTurmo(){
-        if (File != null){   
-            const image = ref(DataBase,'files.png');
-            uploadBytes(image,FileFirebase);
-        }
-        
-    }
-    //
 
 
     const loadImage = (image) =>{
