@@ -39,6 +39,9 @@ def predictImage():
 
     prediction, _ = model.predict(image)
 
+    print(help(model.predict))
+    print(help(model.predict_classes))
+
     img = np.reshape(prediction, (128, 128))
 
     img = img*255

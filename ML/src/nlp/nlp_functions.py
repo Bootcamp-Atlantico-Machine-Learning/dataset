@@ -140,7 +140,7 @@ def readModel(model_path):
       model = tf.keras.models.load_model(model_path)
 
       print('Modelo carregado com sucesso!')
-      
+
     except:
       raise Exception('Erro ao carregar o modelo!')
     
