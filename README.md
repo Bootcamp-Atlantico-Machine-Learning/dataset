@@ -23,5 +23,3 @@ devem ser implementadas em machine_learning.py.
 
 Funções que são genéricas de entrada de arquivos, para mostrar gráficos, leitura de arquivos, escrita devem ser implementadas dentro  da pasta utils.
 Neste caso é possivel subcategorizar se necessário, criando mais arquivos .py para alguma categoria específica dentro da pasta utils, por exemplo, arquivo .py destiado exclusivo para implementações de funções de leitura e escrita de arquivos.
-
-
